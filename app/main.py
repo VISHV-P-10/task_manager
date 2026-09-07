@@ -1,5 +1,5 @@
 from fastapi import FastAPI,status
-from app.schemas import TaskCreate, TaskResponse
+from app.schemas import TaskCreate, TaskResponse, TaskUpdate
 from fastapi import HTTPException
 app = FastAPI()
 
@@ -33,5 +33,22 @@ def get_task(task_id: int):
             return task
     raise HTTPException(
         status_code=404,
+        detail="Task not found"
+    )
+
+@app.put("/tasks/{task_id}", response_model=TaskResponse)
+def update_task(task_id: int, task_update: TaskUpdate):
+
+    for task in tasks:
+        if task["id"] == task_id:
+
+            task["title"] = task_update.title
+            task["description"] = task_update.description
+            task["completed"] = task_update.completed
+
+            return task
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
         detail="Task not found"
     )
