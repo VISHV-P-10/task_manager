@@ -1,5 +1,5 @@
 from fastapi import FastAPI,status
-from app.schemas import TaskCreate, TaskResponse, TaskUpdate
+from app.schemas import TaskCreate, TaskResponse, TaskUpdate,TaskPatch
 from fastapi import HTTPException
 app = FastAPI()
 
@@ -45,6 +45,23 @@ def update_task(task_id: int, task_update: TaskUpdate):
             task["title"] = task_update.title
             task["description"] = task_update.description
             task["completed"] = task_update.completed
+
+            return task
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Task not found"
+    )
+@app.patch("/tasks/{task_id}", response_model=TaskResponse)
+def patch_task(task_id: int, task_patch: TaskPatch):
+
+    for task in tasks:
+        if task["id"] == task_id:
+
+            update_data = task_patch.model_dump(exclude_unset=True)
+
+            for field, value in update_data.items():
+                task[field] = value
 
             return task
 
