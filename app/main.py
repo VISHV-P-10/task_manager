@@ -69,3 +69,16 @@ def patch_task(task_id: int, task_patch: TaskPatch):
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Task not found"
     )
+
+@app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(task_id: int):
+
+    for task in tasks:
+        if task["id"] == task_id:
+            tasks.remove(task)
+            return
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Task not found"
+    )
