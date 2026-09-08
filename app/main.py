@@ -1,6 +1,8 @@
 from fastapi import FastAPI,status
 from app.schemas import TaskCreate, TaskResponse, TaskUpdate,TaskPatch
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
+from app.exceptions import TaskNotFoundException
 app = FastAPI()
 
 tasks = []
@@ -31,10 +33,8 @@ def get_task(task_id: int):
     for task in tasks:
         if task["id"] == task_id:
             return task
-    raise HTTPException(
-        status_code=404,
-        detail="Task not found"
-    )
+        
+    raise TaskNotFoundException(task_id)    
 
 @app.put("/tasks/{task_id}", response_model=TaskResponse)
 def update_task(task_id: int, task_update: TaskUpdate):
@@ -48,10 +48,7 @@ def update_task(task_id: int, task_update: TaskUpdate):
 
             return task
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Task not found"
-    )
+    raise TaskNotFoundException(task_id)
 @app.patch("/tasks/{task_id}", response_model=TaskResponse)
 def patch_task(task_id: int, task_patch: TaskPatch):
 
@@ -65,10 +62,7 @@ def patch_task(task_id: int, task_patch: TaskPatch):
 
             return task
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Task not found"
-    )
+            raise TaskNotFoundException(task_id)
 
 @app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(task_id: int):
@@ -78,7 +72,14 @@ def delete_task(task_id: int):
             tasks.remove(task)
             return
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Task not found"
+    raise TaskNotFoundException(task_id)
+
+@app.exception_handler(TaskNotFoundException)
+async def task_not_found_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": "TASK_NOT_FOUND",
+            "message": f"Task with id {exc.task_id} was not found"
+        }
     )
