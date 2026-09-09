@@ -1,62 +1,62 @@
 from app.exceptions import TaskNotFoundException
+from app.repositories import task_repository
 
-def create_task(tasks, task_data):
+
+def create_task(task_data):
 
     new_task = {
-        "id": len(tasks) + 1,
+        "id": len(task_repository.tasks) + 1,
         "title": task_data.title,
         "description": task_data.description,
         "completed": task_data.completed
     }
 
-    tasks.append(new_task)
+    return task_repository.create_task(new_task)
 
-    return new_task
 
-def get_tasks(tasks):
-    return tasks
+def get_tasks():
 
-def get_task(tasks, task_id):
+    return task_repository.get_tasks()
 
-    for task in tasks:
-        if task["id"] == task_id:
-            return task
 
-    raise TaskNotFoundException(task_id)
+def get_task(task_id):
 
-def update_task(tasks, task_id, task_update):
+    task = task_repository.get_task(task_id)
 
-    for task in tasks:
-        if task["id"] == task_id:
+    if task is None:
+        raise TaskNotFoundException(task_id)
 
-            task["title"] = task_update.title
-            task["description"] = task_update.description
-            task["completed"] = task_update.completed
+    return task
 
-            return task
 
-    raise TaskNotFoundException(task_id)
+def update_task(task_id, task_data):
 
-def patch_task(tasks, task_id, task_patch):
+    task = task_repository.update_task(task_id, task_data)
 
-    for task in tasks:
-        if task["id"] == task_id:
+    if task is None:
+        raise TaskNotFoundException(task_id)
 
-            update_data = task_patch.model_dump(exclude_unset=True)
+    return task
 
-            for field, value in update_data.items():
-                task[field] = value
 
-            return task
+def patch_task(task_id, task_patch):
 
-    raise TaskNotFoundException(task_id)
+    update_data = task_patch.model_dump(exclude_unset=True)
 
-def delete_task(tasks, task_id):
+    task = task_repository.patch_task(
+        task_id,
+        update_data
+    )
 
-    for task in tasks:
-        if task["id"] == task_id:
+    if task is None:
+        raise TaskNotFoundException(task_id)
 
-            tasks.remove(task)
-            return
+    return task
 
-    raise TaskNotFoundException(task_id)
+
+def delete_task(task_id):
+
+    deleted = task_repository.delete_task(task_id)
+
+    if not deleted:
+        raise TaskNotFoundException(task_id)
