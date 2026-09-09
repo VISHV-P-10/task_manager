@@ -14,27 +14,27 @@ router = APIRouter()
 tasks = []
 @router.post("/tasks", status_code=status.HTTP_201_CREATED)
 def create_task_endpoint(task: TaskCreate):
-    return create_task(tasks, task)
+    return create_task(task)
 
 @router.get("/tasks", response_model=list[TaskResponse])
 def get_tasks_endpoint():
-    return get_tasks(tasks)
+    return get_tasks()
 
 @router.get("/tasks/{task_id}", response_model=TaskResponse)
 def get_task_endpoint(task_id: int):
-    return get_task(tasks, task_id)
+    return get_task(task_id)
 
 @router.put("/tasks/{task_id}", response_model=TaskResponse)
 def update_task_endpoint(task_id: int, task_update: TaskUpdate):
-    return update_task(tasks,task_id, task_update)
+    return update_task(task_id, task_update)
 
 @router.patch("/tasks/{task_id}", response_model=TaskResponse)
 def patch_task_endpoint(task_id: int, task_patch: TaskPatch):
-    return patch_task(tasks,task_id,task_patch)
+    return patch_task(task_id,task_patch)
 
 @router.delete(
     "/tasks/{task_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
 def delete_task_endpoint(task_id: int):
-    delete_task(tasks, task_id)
+    delete_task(task_id)
